@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video/Audio Downloader</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: url('https://images.pexels.com/photos/604684/pexels-photo-604684.jpeg?_gl=1*bxvii3*_ga*MTE4NDM3NzIxMy4xNzU1OTMxMTU5*_ga_8JE65Q40S6*czE3NTU5NjQwNzIkbzIkZzEkdDE3NTU5NjQwODUkajQ3JGwwJGgw') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    color: #fff;
+  }
+
+  h1 { margin-bottom: 1rem; text-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 500px;
+    background: rgba(255,255,255,0.1);
+    padding: 1.5rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+
+  input[type=text], select {
+    padding: 0.7rem;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+  }
+
+  button {
+    padding: 0.7rem;
+    border: none;
+    border-radius: 10px;
+    background: #25D366;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover { background: #1da851; }
+
+  .message { margin-top: 1rem; font-size: 0.95rem; text-align: center; }
+  
+  .preview {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+
+  video, audio { width: 100%; border-radius: 10px; }
+
+  a.download-btn {
+    text-decoration: none;
+    padding: 0.6rem;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-align: center;
+    display: inline-block;
+    transition: 0.3s;
+  }
+  a.download-btn:hover { background: #0056b3; }
+
+  footer {
+    margin-top: auto;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    form { padding: 1rem; }
+  }
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-box {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.infinity {
+  position: relative;
+  width: 160px;
+  height: 80px;
+  transform: rotate(189deg);
+}
+
+.infinity span {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: loopPath 2.5s linear infinite, rainbow 3s linear infinite, fadeTrail 2.5s linear infinite;
+  opacity: 0;
+}
+
+/* delay each dot so they follow each other */
+.infinity span:nth-child(1) { animation-delay: 0s; }
+.infinity span:nth-child(2) { animation-delay: 0.2s; }
+.infinity span:nth-child(3) { animation-delay: 0.4s; }
+.infinity span:nth-child(4) { animation-delay: 0.6s; }
+.infinity span:nth-child(5) { animation-delay: 0.8s; }
+.infinity span:nth-child(6) { animation-delay: 1s; }
+.infinity span:nth-child(7) { animation-delay: 1.2s; }
+.infinity span:nth-child(8) { animation-delay: 1.4s; }
+
+@keyframes loopPath {
+  0%   { transform: translate(-50%, -50%) translateX(-70px); }
+  25%  { transform: translate(-50%, -50%) translateY(-40px); }
+  50%  { transform: translate(-50%, -50%) translateX(70px); }
+  75%  { transform: translate(-50%, -50%) translateY(40px); }
+  100% { transform: translate(-50%, -50%) translateX(-70px); }
+}
+
+/* neon rainbow glow */
+@keyframes rainbow {
+  0% { background: #ff3c3c; box-shadow: 0 0 6px #ff3c3c; }
+  25% { background: #ffbf00; box-shadow: 0 0 6px #ffbf00; }
+  50% { background: #25d366; box-shadow: 0 0 6px #25d366; }
+  75% { background: #007bff; box-shadow: 0 0 6px #007bff; }
+  100% { background: #ff3c3c; box-shadow: 0 0 6px #ff3c3c; }
+}
+
+/* fade trail effect */
+@keyframes fadeTrail {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+#loader-text {
+  margin-top: 1rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+
+
+}
+
+</style>
+</head>
+<body>
+<h1>Video/Audio Downloader</h1>
+<div id="loader" class="loader-overlay" style="display:none;">
+  <div class="loader-box">
+    <div class="infinity">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <p id="loader-text">Fetching your video...</p>
+  </div>
+</div>
+
+
+
+
+<form method="POST">
+  <input type="text" name="url" placeholder="Enter video/audio URL" required>
+  <select name="type">
+    <option value="video">Video</option>
+    <option value="audio">Audio (MP3)</option>
+  </select>
+  <button type="submit">Download</button>
+</form>
+
+{% if error %}
+<div class="message" style="color:#ff6b6b;">{{ error }}</div>
+{% endif %}
+
+{% if success %}
+<div class="message" style="color:#7bed9f;">Downloaded: {{ file }}</div>
+<div class="preview">
+  {% if file.endswith('.mp3') %}
+    <audio controls>
+      <source src="{{ url_for('download_file', filename=file) }}" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  {% else %}
+    <video controls>
+      <source src="{{ url_for('download_file', filename=file) }}" type="video/mp4">
+      Your browser does not support the video element.
+    </video>
+  {% endif %}
+  <a href="{{ url_for('download_file', filename=file) }}" class="download-btn">Download File</a>
+</div>
+{% endif %}
+
+<footer>© 2025 Video/Audio Downloader. All rights reserved.</footer>
+<script>
+const form = document.querySelector("form");
+const loader = document.getElementById("loader");
+
+form.addEventListener("submit", () => {
+  loader.style.display = "flex";
+});
+</script>
+
+
+</body>
+</html>
