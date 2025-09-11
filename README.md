@@ -1,4 +1,5 @@
 # 🎬 Video & Audio Downloader  
+[![Python](https://img.shields.io/badge/Python-3.10-blue)]
 
 A sleek **Flask-powered web application** that lets you easily **download videos or extract audio** from YouTube links using [yt-dlp](https://github.com/yt-dlp/yt-dlp).  
 
